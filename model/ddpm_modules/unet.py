@@ -273,6 +273,8 @@ class UNet(nn.Module):
 
         self.ups = nn.ModuleList(ups)
         self.final_conv = FinalBlock(pre_channel, default(out_channel, in_channel), groups=norm_groups,activation_type=final_activation,nb_iterations=nb_iterations,nb_kerhalfsize=nb_kerhalfsize,leaky_alpha=leaky_alpha)
+        self.tv = TVLayer(weight=0.05, n_iter=1)
+        
     def forward(self, x, time):
         t = self.time_mlp(time) if exists(self.time_mlp) else None
 
