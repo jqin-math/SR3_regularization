@@ -163,6 +163,40 @@ class ResnetBlocWithAttn(nn.Module):
             x = self.attn(x)
         return x
 
+## add new layer 3/31/2026
+class TVLayer(nn.Module):
+    def __init__(self, weight=0.1, eps=1e-6, n_iter=1):
+        super().__init__()
+        self.weight = weight
+        self.eps = eps
+        self.n_iter = n_iter  # number of gradient descent steps
+
+    def forward(self, x):
+        for _ in range(self.n_iter):
+            dx = x[:, :, :, 1:] - x[:, :, :, :-1]
+            dy = x[:, :, 1:, :] - x[:, :, :-1, :]
+
+            dx_pad = F.pad(dx, (0,1,0,0))
+            dy_pad = F.pad(dy, (0,0,0,1))
+
+            # isotropic TV gradient
+            grad_norm = torch.sqrt(dx_pad**2 + dy_pad**2 + self.eps)
+
+            dx_norm = dx_pad / grad_norm
+            dy_norm = dy_pad / grad_norm
+
+            # divergence (negative adjoint of gradient)
+            div_x = dx_norm[:, :, :, :-1] - dx_norm[:, :, :, 1:]
+            div_y = dy_norm[:, :, :-1, :] - dy_norm[:, :, 1:, :]
+
+            div_x = F.pad(div_x, (1,0,0,0))
+            div_y = F.pad(div_y, (0,0,1,0))
+
+            div = div_x + div_y
+
+            x = x + self.weight * div   # NOTE: ascent on divergence = descent on TV
+
+        return x
 
 class UNet(nn.Module):
     def __init__(
@@ -262,4 +296,6 @@ class UNet(nn.Module):
             else:
                 x = layer(x)
 
-        return self.final_conv(x)
+        x = self.final_conv(x)
+        x = self.tv(x)
+        return x
