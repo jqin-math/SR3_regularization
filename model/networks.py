@@ -101,7 +101,9 @@ def define_G(opt):
         final_activation=model_opt['unet']['final_activation'],
         nb_iterations=model_opt['unet']['nb_iterations'],
         nb_kerhalfsize=model_opt['unet']['nb_kerhalfsize'],
-        leaky_alpha=model_opt['unet']['leaky_alpha']
+        leaky_alpha=model_opt['unet']['leaky_alpha'],
+        sleaky_beta=model_opt['unet']['sleaky_beta']
+
     )
     netG = diffusion.GaussianDiffusion(
         model,
@@ -111,7 +113,11 @@ def define_G(opt):
         conditional=model_opt['diffusion']['conditional'],
         schedule_opt=model_opt['beta_schedule']['train'],
         tv1_weight=model_opt['loss']['TV1_weight'],
-        tv2_weight=model_opt['loss']['TV2_weight']
+        tv2_weight=model_opt['loss']['TV2_weight'],
+        tvf_weight=model_opt['loss']['TVF_weight'],
+        tvf_alpha=model_opt['loss']['TVF_alpha'],
+        wavelet_l1_weight=model_opt['loss']['wavelet_l1_weight'],
+        wavelet_type=model_opt['loss']['wavelet_type']
     )
     if opt['phase'] == 'train':
         # init_weights(netG, init_type='kaiming', scale=0.1)

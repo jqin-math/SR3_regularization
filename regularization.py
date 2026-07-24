@@ -1,6 +1,6 @@
 import torch
 import torch.nn.functional as F
-
+import numpy as np
 def TV1(img, epsilon=1e-6):
     """
     Computes the smooth total variation (TV) loss for a batch of images.
@@ -51,35 +51,6 @@ def TV2(img, epsilon=1e-6):
 
     tv = torch.sqrt(dx**2 + dy**2 + epsilon)
     return tv.mean()
-
-
-def VTV(img, epsilon=1e-6):
-    """
-    Computes isotropic vectorial total variation (VTV) for a batch of color images.
-
-    Args:
-        img (Tensor): shape (N, C, H, W)
-        epsilon (float): small constant for numerical stability
-
-    Returns:
-        Scalar tensor representing the VTV loss
-    """
-    # Finite differences
-    dx = img[:, :, :, 1:] - img[:, :, :, :-1]   # (N, C, H, W-1)
-    dy = img[:, :, 1:, :] - img[:, :, :-1, :]   # (N, C, H-1, W)
-
-    # Pad to original size
-    dx = F.pad(dx, (0, 1, 0, 0))
-    dy = F.pad(dy, (0, 0, 0, 1))
-
-    # Vectorial TV: joint norm across channels
-    # sum over channel dimension
-    tv = torch.sqrt(
-        torch.sum(dx**2 + dy**2, dim=1) + epsilon
-    )  # (N, H, W)
-
-    return tv.mean()
-
 
 from scipy.special import comb
 def frac_diff_1d(img, alpha, axis, n_terms=20):

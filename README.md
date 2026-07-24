@@ -15,60 +15,6 @@ There are some implementation details that may vary from the paper's description
 
 **If you just want to upscale $(64 \times 64)\text{px} \rightarrow (512 \times 512)\text{px}$ images using the pre-trained model, check out [this google colab script](https://colab.research.google.com/drive/1G1txPI1GKueKH0cSi_DgQFKwfyJOXlhY?usp=sharing).**
 
-## Status
-
-**★★★ NEW: The follow-up [Palette-Image-to-Image-Diffusion-Models](https://arxiv.org/abs/2111.05826) is now available; See the details [here](https://github.com/Janspiry/Palette-Image-to-Image-Diffusion-Models) ★★★**
-
-### Conditional Generation (with Super Resolution)
-
-- [x] 16×16 -> 128×128 on FFHQ-CelebaHQ
-- [x] 64×64 -> 512×512 on FFHQ-CelebaHQ
-
-### Unconditional Generation
-
-- [x] 128×128 face generation on FFHQ
-- [ ] ~~1024×1024 face generation by a cascade of 3 models~~
-
-### Training Step
-
-- [x] log / logger
-- [x] metrics evaluation
-- [x] multi-gpu support
-- [x] resume training / pretrained model
-- [x] validate alone script
-- [x] [Weights and Biases Logging](https://github.com/Janspiry/Image-Super-Resolution-via-Iterative-Refinement/pull/44) 🌟 NEW
-
-
-
-## Results
-
-*Note:*  We set the maximum reverse steps budget to $2000$. We limited the model parameters in `Nvidia 1080Ti`, **image noise** and **hue deviation** occasionally appear in high-resolution images, resulting in low scores.  There is a lot of room for optimization.  **We are welcome to any contributions for more extensive experiments and code enhancements.**
-
-| Tasks/Metrics        | SSIM(+) | PSNR(+) | FID(-)  | IS(+)   |
-| -------------------- | ----------- | -------- | ---- | ---- |
-| 16×16 -> 128×128 | 0.675       | 23.26    | - | - |
-| 64×64 -> 512×512     | 0.445 | 19.87 | - | - |
-| 128×128 | - | - | | |
-| 1024×1024 | - | - |      |      |
-
-- #### 16×16 -> 128×128 on FFHQ-CelebaHQ [[More Results](https://drive.google.com/drive/folders/1Vk1lpHzbDf03nME5fV9a-lWzSh3kMK14?usp=sharing)]
-
-| <img src="./misc/sr_process_16_128_0.png" alt="show" style="zoom:90%;" /> |  <img src="./misc/sr_process_16_128_1.png" alt="show" style="zoom:90%;" />    |   <img src="./misc/sr_process_16_128_2.png" alt="show" style="zoom:90%;" />   |
-| ------------------------------------------------------------ | ---- | ---- |
-
-- #### 64×64 -> 512×512 on FFHQ-CelebaHQ [[More Results](https://drive.google.com/drive/folders/1yp_4xChPSZUeVIgxbZM-e3ZSsSgnaR9Z?usp=sharing)]
-
-| <img src="./misc/sr_64_512_0_inf.png" alt="show" style="zoom:90%;" /> | <img src="./misc/sr_64_512_0_sr.png" alt="show" style="zoom:90%;" /> | <img src="./misc/sr_64_512_0_hr.png" alt="show" style="zoom:90%;" /> |
-| ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| <img src="./misc/sr_64_512_1_sr.png" alt="show" style="zoom:90%;" /> | <img src="./misc/sr_64_512_2_sr.png" alt="show" style="zoom:90%;" /> | <img src="./misc/sr_64_512_3_sr.png" alt="show" style="zoom:90%;" /> |
-
-- #### 128×128 face generation on FFHQ [[More Results](https://drive.google.com/drive/folders/13AsjRwDw4wMmL0bK7wPd2rP7ds7eyAMh?usp=sharing)]
-
-| <img src="./misc/sample_process_128_0.png" alt="show" style="zoom:90%;" /> |  <img src="./misc/sample_process_128_1.png" alt="show" style="zoom:90%;" />    |   <img src="./misc/sample_process_128_2.png" alt="show" style="zoom:90%;" />   |
-| ------------------------------------------------------------ | ---- | ---- |
-
-
-
 ## Usage
 ### Environment
 ```python
@@ -76,20 +22,20 @@ pip install -r requirement.txt
 ```
 
 ### Pretrained Model
-
-This paper is based on "Denoising Diffusion Probabilistic Models", and we build both DDPM/SR3 network structures, which use timesteps/gamma as model embedding inputs, respectively. In our experiments, the SR3 model can achieve better visual results with the same reverse steps and learning rate. You can select the JSON files with annotated suffix names to train the different models.
-
-| Tasks                             | Platform（Code：qwer)                                        | 
-| --------------------------------- | ------------------------------------------------------------ |
-| 16×16 -> 128×128 on FFHQ-CelebaHQ | [Google Drive](https://drive.google.com/drive/folders/12jh0K8XoM1FqpeByXvugHHAF3oAZ8KRu?usp=sharing)\|[Baidu Yun](https://pan.baidu.com/s/1OzsGZA2Vmq1ZL_VydTbVTQ) |  
-| 64×64 -> 512×512 on FFHQ-CelebaHQ | [Google Drive](https://drive.google.com/drive/folders/1mCiWhFqHyjt5zE4IdA41fjFwCYdqDzSF?usp=sharing)\|[Baidu Yun](https://pan.baidu.com/s/1orzFmVDxMmlXQa2Ty9zY3g) |   
-| 128×128 face generation on FFHQ   | [Google Drive](https://drive.google.com/drive/folders/1ldukMgLKAxE7qiKdFJlu-qubGlnW-982?usp=sharing)\|[Baidu Yun](https://pan.baidu.com/s/1Vsd08P1A-48OGmnRV0E7Fg ) | 
-
 ```python
-# Download the pretrained model and edit [sr|sample]_[ddpm|sr3]_[resolution option].json about "resume_state":
+# Identify the pretrained model and edit [sr|sample]_[ddpm|sr3]_[resolution option].json about "resume_state":
 "resume_state": [your pretrained model's path]
 ```
+### Pre-train CNN and generate predicted images
 
+Modify the parameters in several files in the /pretrain_CNN directory, and then run the following script directly.
+
+```shell
+python pretrain_CNN/train.py
+```
+
+The CNN predictions will be written to the specified path, 
+note that the path needs to be specified as the previously generated **dataset/xxx/CNN_sr_[lr]_[hr]**.
 ### Data Prepare
 
 #### New Start
@@ -126,23 +72,25 @@ then you need to change the datasets config to your data path and image resoluti
      "loss": {
             "type": "l1", // l1 or l2
             "TV1_weight": 0.0,//Anisotropic Total Variation Loss Weight, implemented in regularization.py
-            "TV2_weight": 0.0//Smoothed Isotropic Total Variation Loss
+            "TV2_weight": 0.0,
+            "TVF_weight": 0.0, // fractional TV
+            "TVF_alpha": 1.6,// fractional TV hyper parameter
+            "wavelet_l1_weight": 1.0  //wavelet
         },
         "unet": {
             //....// other configurations of Unet 
-            "final_activation": "stdleakyrelu", // default "swish", "stdrelu" or "stdleakyrelu" for the activation function of the final block of Unet
+            "final_activation": "s_stdleakyrelu", // default swish. Can be chosen from stdrelu, stdleakyrelu, relu, s_stdleakyrelu,and leakyrelu
             "nb_iterations" :10, // number of iterations for the STDReLu/STDReLuLeaky
             "nb_kerhalfsize": 1, // half size of the kernel for the STDReLu/STDReLuLeaky
-            "leaky_alpha": 0.2 // alpha for the leaky relu
+            "leaky_alpha": 0.2, // alpha for the leaky relu
+            "sleaky_beta" : 10.0 // beta for the s_stdleakyrelu
         }
 
 }
 ```
 
 #### Own Data
-
 You also can use your image data by following steps, and we have some examples in dataset folder.
-
 At first, you should organize the images layout like this, this step can be finished by `data/prepare_data.py` automatically:
 
 ```shell
@@ -191,12 +139,19 @@ python sr.py -p val -c config/sr_sr3.json
 python eval.py -p [result root]
 
 
-# Modify and use the history.sh for plots of evaluation history of metrics, which combines the logs from multiple consecutive runs and extract the SSIM and PSNR to generate images. The plotting file is plot_history.py, which can configure the logs to be compared and max number of epochs. 
-python plot_history.py \
-    tv2.log tv2_01.log tv2_10.log\
-    --epoch-only --output comparison_epoch_tv2.png --max-epoch 60
-#plot_losses.py will plot curves of train losses from specified log file.
-python plot_losses.py ./experiments/celeb_tv0_stdrelu_250824_154824/logs/train.log --out_csv plots/losses.csv --out_png plots/losses.png
+#All plots and image grids are produced by the provided shell file. Please open and read that shell file to see exactly what it does and to adjust any paths.
+    #What it does (at a glance):
+        # a. Concatenates multiple train/val logs into ./plots/*.log
+        # b. Calls the plotting scripts to generate comparison figures and CSVs
+        # c. Builds evaluation image grids into ./plots/
+    #How to use:
+        #1.Ensure the plots/ folder exists.
+        #2.Read the shell file, update paths/labels and plotting configurations if needed.
+        #3.
+chmod +x evaluation_plot.sh
+#4.
+./evaluation_plot.sh
+#All outputs will appear under ./plots/.
 ```
 
 
@@ -209,24 +164,6 @@ Set the  image path like steps in `Own Data`, then run the script:
 python infer.py -c [config file]
 ```
 
-## Weights and Biases 🎉
-
-The library now supports experiment tracking, model checkpointing and model prediction visualization with [Weights and Biases](https://wandb.ai/site). You will need to [install W&B](https://pypi.org/project/wandb/) and login by using your [access token](https://wandb.ai/authorize). 
-
-```
-pip install wandb
-
-# get your access token from wandb.ai/authorize
-wandb login
-```
-
-W&B logging functionality is added to the `sr.py`, `sample.py` and `infer.py` files. You can pass `-enable_wandb` to start logging.
-
-- `-log_wandb_ckpt`: Pass this argument along with `-enable_wandb` to save model checkpoints as [W&B Artifacts](https://docs.wandb.ai/guides/artifacts). Both `sr.py` and `sample.py` is enabled with model checkpointing. 
-- `-log_eval`: Pass this argument along with `-enable_wandb` to save the evaluation result as interactive [W&B Tables](https://docs.wandb.ai/guides/data-vis). Note that only `sr.py` is enabled with this feature. If you run `sample.py` in eval mode, the generated images will automatically be logged as image media panel. 
-- `-log_infer`: While running `infer.py` pass this argument along with `-enable_wandb` to log the inference results as interactive W&B Tables. 
-
-You can find more on using these features [here](https://github.com/Janspiry/Image-Super-Resolution-via-Iterative-Refinement/pull/44). 🚀
 
 
 ## Acknowledgements
